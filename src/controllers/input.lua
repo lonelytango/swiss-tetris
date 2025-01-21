@@ -1,7 +1,12 @@
 -- src/controllers/input.lua
 local Config = require('src.constants.config')
 
-local Input = {}
+local Input = {
+    keyStates = {},
+    INITIAL_DELAY = 0.2,  -- Delay before starting repeat
+    REPEAT_DELAY = 0.05,  -- Delay between repeats
+    timeSinceKeyPress = 0
+}
 
 function Input.isMouseOverButton(x, y)
     return x >= Config.BUTTON_X and x <= Config.BUTTON_X + Config.BUTTON_WIDTH and
@@ -9,6 +14,11 @@ function Input.isMouseOverButton(x, y)
 end
 
 function Input.handleKeyPressed(key, game)
+    Input.keyStates[key] = {
+        pressed = true,
+        time = 0
+    }
+
     if key == "left" then
         game:movePiece(-1)
     elseif key == "right" then
@@ -17,6 +27,29 @@ function Input.handleKeyPressed(key, game)
         game:hardDrop()
     elseif key == "up" then
         game:rotatePiece()
+    end
+end
+
+function Input.handleKeyReleased(key, game)
+    Input.keyStates[key] = nil
+end
+
+function Input.update(dt, game)
+    -- Handle held keys
+    for key, state in pairs(Input.keyStates) do
+        state.time = state.time + dt
+        
+        if state.time >= Input.INITIAL_DELAY then
+            local repeatCount = math.floor((state.time - Input.INITIAL_DELAY) / Input.REPEAT_DELAY)
+            if repeatCount > state.lastRepeatCount then
+                state.lastRepeatCount = repeatCount
+                if key == "left" then
+                    game:movePiece(-1)
+                elseif key == "right" then
+                    game:movePiece(1)
+                end
+            end
+        end
     end
 end
 

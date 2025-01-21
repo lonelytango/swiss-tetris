@@ -1,5 +1,6 @@
 -- src/models/grid.lua
 local Config = require('src.constants.config')
+local ParticleSystem = require('src.models.particle_system')
 
 local Grid = {}
 
@@ -11,6 +12,12 @@ function Grid.new()
             grid[y][x] = {occupied = false, color = nil}
         end
     end
+
+    -- Add animation state
+    grid.clearingLines = {}
+    grid.animationTimer = 0
+    grid.isAnimating = false
+    grid.particles = ParticleSystem.new()
     return grid
 end
 
@@ -23,8 +30,12 @@ function Grid.isValidPosition(grid, piece)
                 local gridY = piece.y + y - 1
                 
                 if gridX < 1 or gridX > Config.GRID_WIDTH or
-                   gridY > Config.GRID_HEIGHT or
-                   (gridY > 0 and grid[gridY][gridX].occupied) then
+                   gridY > Config.GRID_HEIGHT then
+                    return false
+                end
+                
+                -- Only check collision if the position is within the grid and we're not animating
+                if gridY > 0 and not grid.isAnimating and grid[gridY][gridX].occupied then
                     return false
                 end
             end
@@ -78,9 +89,24 @@ function Grid.startClearAnimation(grid, completeLines)
     grid.clearingLines = completeLines
     grid.isAnimating = true
     grid.animationTimer = 0
+
+    -- Create particles for each block in clearing lines
+    for _, y in ipairs(completeLines) do
+        for x = 1, Config.GRID_WIDTH do
+            if grid[y][x].occupied then
+                local px = (x - 1) * Config.GRID_SIZE + Config.GRID_SIZE / 2
+                local py = (y - 1) * Config.GRID_SIZE + Config.GRID_SIZE / 2
+                grid.particles:emit(px, py, grid[y][x].color, 5)
+            end
+        end
+    end
 end
 
 function Grid.updateAnimation(grid, dt)
+
+    -- Update particles even if not animating
+    grid.particles:update(dt)
+
     if not grid.isAnimating then return 0 end
     
     grid.animationTimer = grid.animationTimer + dt

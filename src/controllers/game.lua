@@ -59,6 +59,11 @@ function Game:update(dt)
         if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
             self:levelUp()
         end
+        
+        -- Spawn new piece after line clear animation
+        if not self.grid.isAnimating then
+            self:spawnNewPiece()
+        end
     end
     
     -- Only update drop timer if not animating
