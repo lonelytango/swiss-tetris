@@ -50,10 +50,24 @@ end
 function Game:update(dt)
     if self.gameOver then return end
     
-    self.dropTimer = self.dropTimer + dt
-    if self.dropTimer >= self.currentDropTime then
-        self.dropTimer = 0
-        self:movePieceDown()
+    -- Update grid animations first
+    local linesCleared = Grid.updateAnimation(self.grid, dt)
+    if linesCleared > 0 then
+        self.linesForNextLevel = self.linesForNextLevel + linesCleared
+        self:updateScore(linesCleared)
+        
+        if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
+            self:levelUp()
+        end
+    end
+    
+    -- Only update drop timer if not animating
+    if not self.grid.isAnimating then
+        self.dropTimer = self.dropTimer + dt
+        if self.dropTimer >= self.currentDropTime then
+            self.dropTimer = 0
+            self:movePieceDown()
+        end
     end
 end
 

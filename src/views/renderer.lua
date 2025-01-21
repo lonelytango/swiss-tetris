@@ -15,33 +15,59 @@ function Renderer.drawGrid(grid)
                 Config.GRID_SIZE, 
                 Config.GRID_SIZE)
             
-            -- Draw locked pieces
+            -- Check if this line is being cleared
+            local isClearing = false
+            if grid.clearingLines then
+                for _, clearY in ipairs(grid.clearingLines) do
+                    if clearY == y then
+                        isClearing = true
+                        break
+                    end
+                end
+            end
+            
+            -- Draw locked pieces with animation effects
             if grid[y][x].occupied then
-                love.graphics.setColor(grid[y][x].color)
+                local color = grid[y][x].color
+                if isClearing then
+                    -- Flash effect for clearing lines
+                    local flashIntensity = math.abs(math.sin((grid.animationTimer or 0) * 15))
+                    love.graphics.setColor(
+                        1,
+                        1,
+                        1,
+                        flashIntensity
+                    )
+                else
+                    love.graphics.setColor(color)
+                end
+                
                 love.graphics.rectangle("fill", 
                     (x-1) * Config.GRID_SIZE, 
                     (y-1) * Config.GRID_SIZE, 
                     Config.GRID_SIZE-1, 
                     Config.GRID_SIZE-1)
                     
-                -- Add 3D effect
-                love.graphics.setColor(
-                    grid[y][x].color[1] * 1.2,
-                    grid[y][x].color[2] * 1.2,
-                    grid[y][x].color[3] * 1.2
-                )
-                love.graphics.line(
-                    (x-1) * Config.GRID_SIZE,
-                    (y-1) * Config.GRID_SIZE,
-                    (x-1) * Config.GRID_SIZE + Config.GRID_SIZE-1,
-                    (y-1) * Config.GRID_SIZE
-                )
-                love.graphics.line(
-                    (x-1) * Config.GRID_SIZE,
-                    (y-1) * Config.GRID_SIZE,
-                    (x-1) * Config.GRID_SIZE,
-                    (y-1) * Config.GRID_SIZE + Config.GRID_SIZE-1
-                )
+                -- Add 3D effect (only for non-clearing blocks)
+                if not isClearing then
+                    love.graphics.setColor(
+                        color[1] * 1.2,
+                        color[2] * 1.2,
+                        color[3] * 1.2
+                    )
+                    love.graphics.line(
+                        (x-1) * Config.GRID_SIZE,
+                        (y-1) * Config.GRID_SIZE,
+                        (x-1) * Config.GRID_SIZE + Config.GRID_SIZE-1,
+                        (y-1) * Config.GRID_SIZE
+                    )
+                    love.graphics.line(
+                        (x-1) * Config.GRID_SIZE,
+                        (y-1) * Config.GRID_SIZE,
+                        (x-1) * Config.GRID_SIZE,
+                        (y-1) * Config.GRID_SIZE + Config.GRID_SIZE-1
+                    )
+                end
             end
         end
     end

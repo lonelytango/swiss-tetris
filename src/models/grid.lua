@@ -51,10 +51,10 @@ function Grid.lockPiece(grid, piece)
 end
 
 function Grid.clearLines(grid)
-    local linesCleared = 0
-    local y = Config.GRID_HEIGHT
+    local completeLines = {}
     
-    while y > 0 do
+    -- Find complete lines
+    for y = Config.GRID_HEIGHT, 1, -1 do
         local complete = true
         for x = 1, Config.GRID_WIDTH do
             if not grid[y][x].occupied then
@@ -62,26 +62,76 @@ function Grid.clearLines(grid)
                 break
             end
         end
-        
         if complete then
-            linesCleared = linesCleared + 1
-            
-            -- Move all lines above this one down
-            for moveY = y, 2, -1 do
-                for x = 1, Config.GRID_WIDTH do
-                    grid[moveY][x] = grid[moveY-1][x]
-                end
-            end
-            -- Clear top line
-            for x = 1, Config.GRID_WIDTH do
-                grid[1][x] = {occupied = false, color = nil}
-            end
-        else
-            y = y - 1
+            table.insert(completeLines, y)
         end
     end
     
-    return linesCleared
+    if #completeLines > 0 then
+        Grid.startClearAnimation(grid, completeLines)
+    end
+    
+    return 0  -- Lines cleared will be returned by updateAnimation
+end
+
+function Grid.startClearAnimation(grid, completeLines)
+    grid.clearingLines = completeLines
+    grid.isAnimating = true
+    grid.animationTimer = 0
+end
+
+function Grid.updateAnimation(grid, dt)
+    if not grid.isAnimating then return 0 end
+    
+    grid.animationTimer = grid.animationTimer + dt
+    local FLASH_DURATION = 0.5  -- Duration of the flash effect
+    local DROP_DURATION = 0.3   -- Duration of the dropping animation
+    
+    -- After flash effect, perform the line clear
+    if grid.animationTimer >= FLASH_DURATION then
+        -- Clear the lines and drop blocks
+        local linesCleared = #grid.clearingLines
+        table.sort(grid.clearingLines)  -- Sort lines from top to bottom
+        
+        -- Count how many lines were cleared below each row
+        local shiftAmount = {}
+        for y = 1, Config.GRID_HEIGHT do
+            shiftAmount[y] = 0
+            for _, clearY in ipairs(grid.clearingLines) do
+                if clearY > y then
+                    shiftAmount[y] = shiftAmount[y] + 1
+                end
+            end
+        end
+        
+        -- Move blocks down
+        for y = Config.GRID_HEIGHT, 1, -1 do
+            if not grid.clearingLines[y] then  -- If this line isn't being cleared
+                local targetY = y + shiftAmount[y]
+                if targetY <= Config.GRID_HEIGHT then
+                    for x = 1, Config.GRID_WIDTH do
+                        grid[targetY][x] = grid[y][x]
+                    end
+                end
+            end
+        end
+        
+        -- Clear top lines
+        for i = 1, linesCleared do
+            for x = 1, Config.GRID_WIDTH do
+                grid[i][x] = {occupied = false, color = nil}
+            end
+        end
+        
+        -- Reset animation state
+        grid.clearingLines = {}
+        grid.isAnimating = false
+        grid.animationTimer = 0
+        
+        return linesCleared
+    end
+    
+    return 0
 end
 
 return Grid
