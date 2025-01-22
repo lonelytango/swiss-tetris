@@ -22,6 +22,8 @@ function Input.handleKeyPressed(key, game)
     elseif key == "right" then
         game:movePiece(1)
     elseif key == "down" then
+        game:movePieceDown()
+    elseif key == "space" then
         game:hardDrop()
     elseif key == "up" then
         game:rotatePiece()

@@ -52,7 +52,8 @@ function Game:spawnNewPiece()
     self.currentPiece = {
         shape = self.nextPiece.shape,
         x = math.floor(Config.GRID_WIDTH / 2) - 1,
-        y = 1
+        y = 1,
+        color = self.nextPiece.color
     }
     -- Generate new next piece
     self.nextPiece = Piece.new()

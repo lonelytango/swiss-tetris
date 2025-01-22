@@ -1,6 +1,7 @@
 -- src/views/renderer.lua
 local Config = require('src.constants.config')
 local Input = require('src.controllers.input')
+local Theme = require('src.themes.theme')
 
 local Renderer = {}
 
@@ -8,7 +9,7 @@ function Renderer.drawGrid(grid)
     for y = 1, Config.GRID_HEIGHT do
         for x = 1, Config.GRID_WIDTH do
             -- Draw grid lines
-            love.graphics.setColor(0.3, 0.3, 0.3)
+            love.graphics.setColor(Theme.current.grid)
             love.graphics.rectangle("line", 
                 (x-1) * Config.GRID_SIZE, 
                 (y-1) * Config.GRID_SIZE, 
@@ -79,9 +80,9 @@ function Renderer.drawCurrentPiece(piece, shadowY)
     local pieceShape = piece.shape[1]
     
     -- Draw shadow piece
-    love.graphics.setColor(piece.shape.color[1], 
-                         piece.shape.color[2], 
-                         piece.shape.color[3], 
+    love.graphics.setColor(piece.color[1],
+        piece.color[2],
+        piece.color[3],
                          0.3)
     for y = 1, #pieceShape do
         for x = 1, #pieceShape[1] do
@@ -96,7 +97,7 @@ function Renderer.drawCurrentPiece(piece, shadowY)
     end
     
     -- Draw current piece with 3D effect
-    love.graphics.setColor(piece.shape.color)
+    love.graphics.setColor(piece.color)
     for y = 1, #pieceShape do
         for x = 1, #pieceShape[1] do
             if pieceShape[y][x] == 1 then
@@ -109,9 +110,9 @@ function Renderer.drawCurrentPiece(piece, shadowY)
                 
                 -- Highlight edges for 3D effect
                 love.graphics.setColor(
-                    piece.shape.color[1] * 1.2,
-                    piece.shape.color[2] * 1.2,
-                    piece.shape.color[3] * 1.2
+                    piece.color[1] * 1.2,
+                    piece.color[2] * 1.2,
+                    piece.color[3] * 1.2
                 )
                 love.graphics.line(
                     (piece.x + x - 1) * Config.GRID_SIZE,
@@ -224,8 +225,12 @@ function Renderer.drawPreviewPiece(piece)
         1.2
     )
 
+    -- Make sure the piece has a color by getting it from the theme if not set
+    if not piece.color then
+        piece.color = Theme.getPieceColor(piece.shape.type)
+    end
     -- Draw the preview piece
-    love.graphics.setColor(piece.shape.color)
+    love.graphics.setColor(piece.color)
     for y = 1, #pieceShape do
         for x = 1, #pieceShape[1] do
             if pieceShape[y][x] == 1 then
@@ -243,9 +248,9 @@ function Renderer.drawPreviewPiece(piece)
 
                 -- Add 3D effect
                 love.graphics.setColor(
-                    piece.shape.color[1] * 1.2,
-                    piece.shape.color[2] * 1.2,
-                    piece.shape.color[3] * 1.2
+                    piece.color[1] * 1.2,
+                    piece.color[2] * 1.2,
+                    piece.color[3] * 1.2
                 )
                 love.graphics.line(
                     offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
@@ -316,6 +321,9 @@ function Renderer.drawHighScores(scores, currentScore, gameOver)
     love.graphics.setColor(1, 1, 1)
 end
 function Renderer.draw(gameState)
+    -- Set background color
+    love.graphics.setColor(Theme.current.background)
+    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
     -- Draw the game grid
     Renderer.drawGrid(gameState.grid)
     

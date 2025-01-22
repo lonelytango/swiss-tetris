@@ -1,4 +1,5 @@
 local RandomBag = require('src.utils.random_bag')
+local Theme = require('src.themes.theme')
 local Piece = {}
 
 Piece.TETROMINOES = {
@@ -10,7 +11,7 @@ Piece.TETROMINOES = {
             {0, 0, 0, 0},
             {0, 0, 0, 0}
         },
-        color = {0, 1, 1} -- cyan
+        type = 'I'
     },
     -- O piece
     {
@@ -18,7 +19,7 @@ Piece.TETROMINOES = {
             {1, 1},
             {1, 1}
         },
-        color = {1, 1, 0} -- yellow
+        type = 'O'
     },
     -- T piece
     {
@@ -27,7 +28,7 @@ Piece.TETROMINOES = {
             {1, 1, 1},
             {0, 0, 0}
         },
-        color = {1, 0, 1} -- purple
+        type = 'T'
     },
     -- L piece
     {
@@ -36,7 +37,7 @@ Piece.TETROMINOES = {
             {1, 1, 1},
             {0, 0, 0}
         },
-        color = {1, 0.5, 0} -- orange
+        type = 'L'
     },
     -- J piece
     {
@@ -45,7 +46,7 @@ Piece.TETROMINOES = {
             {1, 1, 1},
             {0, 0, 0}
         },
-        color = {0, 0, 1} -- blue
+        type = 'J'
     },
     -- S piece
     {
@@ -54,7 +55,7 @@ Piece.TETROMINOES = {
             {1, 1, 0},
             {0, 0, 0}
         },
-        color = {0, 1, 0} -- green
+        type = 'S'
     },
     -- Z piece
     {
@@ -63,7 +64,7 @@ Piece.TETROMINOES = {
             {0, 1, 1},
             {0, 0, 0}
         },
-        color = {1, 0, 0} -- red
+        type = 'Z'
     }
 }
 
@@ -84,11 +85,13 @@ end
 local pieceBag = RandomBag.new(7) -- 7 for the number of tetromino types
 function Piece.new()
     local pieceIndex = pieceBag:next()
-    return {
+    local piece = {
         shape = Piece.TETROMINOES[pieceIndex],
         x = 0,
         y = 1
     }
+    piece.color = Theme.getPieceColor(piece.shape.type)
+    return piece
 end
 
 function Piece.resetBag()

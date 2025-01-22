@@ -53,7 +53,7 @@ function Grid.lockPiece(grid, piece)
                 if gridY > 0 then
                     grid[gridY][piece.x + x] = {
                         occupied = true,
-                        color = piece.shape.color
+                        color = piece.color
                     }
                 end
             end
