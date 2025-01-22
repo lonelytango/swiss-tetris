@@ -194,6 +194,77 @@ function Renderer.drawButton()
         Config.BUTTON_Y + (Config.BUTTON_HEIGHT - textHeight) / 2)
 end
 
+function Renderer.drawPreviewPiece(piece)
+    if not piece then return end
+
+    local pieceShape = piece.shape[1]
+    local pieceWidth = #pieceShape[1]
+    local pieceHeight = #pieceShape
+
+    -- Calculate center position for the preview piece
+    local centerX = Config.PREVIEW_X + (Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
+    local centerY = Config.PREVIEW_Y + (Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
+
+    -- Draw preview box background
+    love.graphics.setColor(0.1, 0.1, 0.1, 0.3)
+    love.graphics.rectangle("fill",
+        Config.PREVIEW_X,
+        Config.PREVIEW_Y,
+        Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+        Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE
+    )
+
+    -- Draw "Next Piece" text
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("Next Piece",
+        Config.PREVIEW_X,
+        Config.PREVIEW_Y - 25,
+        0,
+        1.2,
+        1.2
+    )
+
+    -- Draw the preview piece
+    love.graphics.setColor(piece.shape.color)
+    for y = 1, #pieceShape do
+        for x = 1, #pieceShape[1] do
+            if pieceShape[y][x] == 1 then
+                -- Calculate offset to center the piece
+                local offsetX = centerX - (pieceWidth * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
+                local offsetY = centerY - (pieceHeight * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
+
+                -- Draw each block of the piece
+                love.graphics.rectangle("fill",
+                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    Config.GRID_SIZE * Config.PREVIEW_SCALE - 1,
+                    Config.GRID_SIZE * Config.PREVIEW_SCALE - 1
+                )
+
+                -- Add 3D effect
+                love.graphics.setColor(
+                    piece.shape.color[1] * 1.2,
+                    piece.shape.color[2] * 1.2,
+                    piece.shape.color[3] * 1.2
+                )
+                love.graphics.line(
+                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE + Config.GRID_SIZE * Config
+                    .PREVIEW_SCALE - 1,
+                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE
+                )
+                love.graphics.line(
+                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
+                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE + Config.GRID_SIZE * Config
+                    .PREVIEW_SCALE - 1
+                )
+            end
+        end
+    end
+end
 function Renderer.draw(gameState)
     -- Draw the game grid
     Renderer.drawGrid(gameState.grid)
@@ -203,6 +274,8 @@ function Renderer.draw(gameState)
         local shadowY = gameState:getShadowY()
         Renderer.drawCurrentPiece(gameState.currentPiece, shadowY)
     end
+    -- Draw preview piece
+    Renderer.drawPreviewPiece(gameState.nextPiece)
     
     -- Draw UI elements
     Renderer.drawUI(gameState.score, gameState.level, gameState.gameOver)

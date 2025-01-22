@@ -6,6 +6,7 @@ local Piece = require('src.models.piece')
 local Game = {
     grid = nil,
     currentPiece = nil,
+    nextPiece = nil, -- Add next piece
     score = 0,
     level = 1,
     dropTimer = 0,
@@ -23,8 +24,10 @@ end
 
 function Game:init()
     self.grid = Grid.new()
+    self.nextPiece = Piece.new()
+    self.currentPiece = nil
     self:spawnNewPiece()
-    self:reset()
+    -- self:reset()
 end
 
 function Game:reset()
@@ -35,12 +38,19 @@ function Game:reset()
     self.gameOver = false
     self.linesForNextLevel = 0
     self.currentDropTime = Config.INITIAL_DROP_TIME
+    self.currentPiece = nil
+    self.nextPiece = Piece.new()
     self:spawnNewPiece()
 end
 
 function Game:spawnNewPiece()
-    self.currentPiece = Piece.new()
-    self.currentPiece.x = math.floor(Config.GRID_WIDTH / 2) - 1
+    self.currentPiece = {
+        shape = self.nextPiece.shape,
+        x = math.floor(Config.GRID_WIDTH / 2) - 1,
+        y = 1
+    }
+    -- Generate new next piece
+    self.nextPiece = Piece.new()
     
     if not Grid.isValidPosition(self.grid, self.currentPiece) then
         self.gameOver = true
@@ -59,11 +69,6 @@ function Game:update(dt)
         if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
             self:levelUp()
         end
-        
-        -- -- Spawn new piece after line clear animation
-        -- if not self.grid.isAnimating then
-        --     self:spawnNewPiece()
-        -- end
     end
     
     -- Only update drop timer if not animating
