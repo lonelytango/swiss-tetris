@@ -2,6 +2,7 @@
 local Config = require('src.constants.config')
 local Input = require('src.controllers.input')
 local Theme = require('src.themes.theme')
+local Color = require('src.utils.color')
 
 local Renderer = {}
 
@@ -112,7 +113,7 @@ function Renderer.drawCurrentPiece(piece, shadowY)
     love.graphics.setColor(piece.color[1],
         piece.color[2],
         piece.color[3],
-                         0.3)
+        0.4)
     for y = 1, #pieceShape do
         for x = 1, #pieceShape[1] do
             if pieceShape[y][x] == 1 then
@@ -240,13 +241,13 @@ function Renderer.drawPreviewPiece(piece)
     )
 
     -- Calculate piece size and position
-    local gridSize = component.WIDTH / Config.PREVIEW_SIZE
+    local gridSize = component.WIDTH / Config.PREVIEW_SIZE / 2
     local pieceWidth = #pieceShape[1]
     local pieceHeight = #pieceShape
 
     -- Center the piece in the preview box
     local offsetX = component.X + (component.WIDTH - pieceWidth * gridSize) / 2
-    local offsetY = component.Y + 25 + (component.HEIGHT - pieceHeight * gridSize) / 2
+    local offsetY = component.Y + 20 + (component.HEIGHT - pieceHeight * gridSize) / 2
 
     -- Draw the piece
     love.graphics.setColor(piece.color)

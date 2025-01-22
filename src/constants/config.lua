@@ -9,7 +9,7 @@ local Config = {
     SPEED_INCREASE_FACTOR = 0.9,
     -- Preview configuration
     PREVIEW_SIZE = 4,    -- Size of the preview box (in grid cells)
-    PREVIEW_SCALE = 0.8, -- Scale factor for preview pieces
+    PREVIEW_SCALE = 0.6, -- Scale factor for preview pieces
 
     -- UI Layout configuration
     SIDE_PANEL = {
@@ -63,14 +63,14 @@ Config.COMPONENTS = {
         X = Config.SIDE_PANEL.X,
         Y = getComponentY(3),
         WIDTH = Config.SIDE_PANEL.WIDTH,
-        HEIGHT = Config.SIDE_PANEL.COMPONENT_HEIGHT
+        HEIGHT = Config.SIDE_PANEL.WIDTH
     },
 
     NEXT_PIECE = {
         X = Config.SIDE_PANEL.X,
         Y = getComponentY(4),
-        WIDTH = Config.SIDE_PANEL.WIDTH * 0.8,
-        HEIGHT = Config.SIDE_PANEL.WIDTH * 0.6 -- Make it square for the preview
+        WIDTH = Config.SIDE_PANEL.WIDTH,
+        HEIGHT = Config.SIDE_PANEL.WIDTH
     },
 
     HIGH_SCORES = {

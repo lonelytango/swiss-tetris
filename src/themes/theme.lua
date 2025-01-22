@@ -52,7 +52,7 @@ Theme.DARK = {
 }
 
 -- Current theme (default to PASTEL)
-Theme.current = Theme.CLASSIC
+Theme.current = Theme.DARK
 
 -- Get color for a specific piece type
 function Theme.getPieceColor(pieceType)
