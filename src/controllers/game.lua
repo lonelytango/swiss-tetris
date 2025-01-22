@@ -27,6 +27,7 @@ end
 
 function Game:init()
     self.grid = Grid.new()
+    Piece.resetBag() -- Reset the random bag
     self.nextPiece = Piece.new()
     self.currentPiece = nil
     self.highScores = HighScore.load()
@@ -41,6 +42,7 @@ function Game:reset()
     self.gameOver = false
     self.linesForNextLevel = 0
     self.currentDropTime = Config.INITIAL_DROP_TIME
+    Piece.resetBag() -- Reset the random bag
     self.nextPiece = Piece.new()
     self.currentPiece = nil
     self:spawnNewPiece()

@@ -1,3 +1,4 @@
+local RandomBag = require('src.utils.random_bag')
 local Piece = {}
 
 Piece.TETROMINOES = {
@@ -80,12 +81,17 @@ function Piece.rotate(pieceData)
     return newPiece
 end
 
+local pieceBag = RandomBag.new(7) -- 7 for the number of tetromino types
 function Piece.new()
+    local pieceIndex = pieceBag:next()
     return {
-        shape = Piece.TETROMINOES[love.math.random(#Piece.TETROMINOES)],
+        shape = Piece.TETROMINOES[pieceIndex],
         x = 0,
         y = 1
     }
 end
 
+function Piece.resetBag()
+    pieceBag:initBags()
+end
 return Piece
