@@ -96,7 +96,7 @@ function Grid.startClearAnimation(grid, completeLines)
             if grid[y][x].occupied then
                 local px = (x - 1) * Config.GRID_SIZE + Config.GRID_SIZE / 2
                 local py = (y - 1) * Config.GRID_SIZE + Config.GRID_SIZE / 2
-                grid.particles:emit(px, py, grid[y][x].color, 5)
+                grid.particles:emit(px, py, grid[y][x].color, 30)
             end
         end
     end

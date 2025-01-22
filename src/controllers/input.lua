@@ -3,9 +3,7 @@ local Config = require('src.constants.config')
 
 local Input = {
     keyStates = {},
-    INITIAL_DELAY = 0.2,  -- Delay before starting repeat
-    REPEAT_DELAY = 0.05,  -- Delay between repeats
-    timeSinceKeyPress = 0
+    INITIAL_DELAY = 0.2, -- Delay before starting repeat
 }
 
 function Input.isMouseOverButton(x, y)
@@ -30,24 +28,16 @@ function Input.handleKeyPressed(key, game)
     end
 end
 
-function Input.handleKeyReleased(key, game)
-    Input.keyStates[key] = nil
-end
-
 function Input.update(dt, game)
     -- Handle held keys
     for key, state in pairs(Input.keyStates) do
         state.time = state.time + dt
         
         if state.time >= Input.INITIAL_DELAY then
-            local repeatCount = math.floor((state.time - Input.INITIAL_DELAY) / Input.REPEAT_DELAY)
-            if repeatCount > state.lastRepeatCount then
-                state.lastRepeatCount = repeatCount
-                if key == "left" then
-                    game:movePiece(-1)
-                elseif key == "right" then
-                    game:movePiece(1)
-                end
+            if key == "left" then
+                game:movePiece(-1)
+            elseif key == "right" then
+                game:movePiece(1)
             end
         end
     end

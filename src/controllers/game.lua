@@ -60,10 +60,10 @@ function Game:update(dt)
             self:levelUp()
         end
         
-        -- Spawn new piece after line clear animation
-        if not self.grid.isAnimating then
-            self:spawnNewPiece()
-        end
+        -- -- Spawn new piece after line clear animation
+        -- if not self.grid.isAnimating then
+        --     self:spawnNewPiece()
+        -- end
     end
     
     -- Only update drop timer if not animating

@@ -22,9 +22,9 @@ function love.keypressed(key)
     Input.handleKeyPressed(key, gameState)
 end
 
-function love.keyreleased(key)
-    Input.handleKeyReleased(key, gameState)
-end
+-- function love.keyreleased(key)
+--     Input.handleKeyReleased(key, gameState)
+-- end
 
 function love.mousepressed(x, y, button)
     Input.handleMousePressed(x, y, button, gameState)
