@@ -265,6 +265,56 @@ function Renderer.drawPreviewPiece(piece)
         end
     end
 end
+function Renderer.drawHighScores(scores, currentScore, gameOver)
+    -- Draw high scores header
+    love.graphics.setColor(1, 1, 1)
+    love.graphics.print("HIGH SCORES",
+        Config.HIGHSCORE_X,
+        Config.HIGHSCORE_Y,
+        0,
+        1.2,
+        1.2)
+
+    -- Draw each high score
+    for i, score in ipairs(scores) do
+        -- Determine if this score is the new high score that was just achieved
+        local isNewHighScore = gameOver and currentScore == score and
+            (not scores[i + 1] or currentScore > scores[i + 1])
+
+        -- Set color (yellow for new high score, white for others)
+        if isNewHighScore then
+            love.graphics.setColor(1, 1, 0) -- Yellow
+        else
+            love.graphics.setColor(1, 1, 1) -- White
+        end
+
+        -- Draw score with rank
+        love.graphics.print(
+            string.format("%d.  %d", i, score),
+            Config.HIGHSCORE_X,
+            Config.HIGHSCORE_Y + (i * 25) + 30,
+            0,
+            1,
+            1
+        )
+    end
+
+    -- If there are no scores yet, show a message
+    if #scores == 0 then
+        love.graphics.setColor(0.7, 0.7, 0.7) -- Gray color
+        love.graphics.print(
+            "No scores yet!",
+            Config.HIGHSCORE_X,
+            Config.HIGHSCORE_Y + 30,
+            0,
+            1,
+            1
+        )
+    end
+
+    -- Reset color
+    love.graphics.setColor(1, 1, 1)
+end
 function Renderer.draw(gameState)
     -- Draw the game grid
     Renderer.drawGrid(gameState.grid)
@@ -279,6 +329,7 @@ function Renderer.draw(gameState)
     
     -- Draw UI elements
     Renderer.drawUI(gameState.score, gameState.level, gameState.gameOver)
+    Renderer.drawHighScores(gameState.highScores, gameState.score, gameState.gameOver)
     Renderer.drawButton()
     
     -- Reset color

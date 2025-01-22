@@ -15,5 +15,7 @@ Config.BUTTON_X = (Config.GRID_WIDTH * Config.GRID_SIZE) + 20
 Config.BUTTON_Y = 20
 Config.PREVIEW_X = Config.BUTTON_X                              -- Same X as button
 Config.PREVIEW_Y = Config.BUTTON_Y + Config.BUTTON_HEIGHT + 100 -- Below score display
+Config.HIGHSCORE_X = Config.BUTTON_X
+Config.HIGHSCORE_Y = Config.PREVIEW_Y + (Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE) + 40
 
 return Config

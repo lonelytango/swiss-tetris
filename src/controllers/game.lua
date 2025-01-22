@@ -2,6 +2,7 @@
 local Config = require('src.constants.config')
 local Grid = require('src.models.grid')
 local Piece = require('src.models.piece')
+local HighScore = require('src.models.highscore')
 
 local Game = {
     grid = nil,
@@ -12,7 +13,9 @@ local Game = {
     dropTimer = 0,
     gameOver = false,
     linesForNextLevel = 0,
-    currentDropTime = Config.INITIAL_DROP_TIME
+    currentDropTime = Config.INITIAL_DROP_TIME,
+    highScores = {},
+    newHighScore = false
 }
 
 function Game:new()
@@ -26,8 +29,8 @@ function Game:init()
     self.grid = Grid.new()
     self.nextPiece = Piece.new()
     self.currentPiece = nil
+    self.highScores = HighScore.load()
     self:spawnNewPiece()
-    -- self:reset()
 end
 
 function Game:reset()
@@ -38,8 +41,8 @@ function Game:reset()
     self.gameOver = false
     self.linesForNextLevel = 0
     self.currentDropTime = Config.INITIAL_DROP_TIME
-    self.currentPiece = nil
     self.nextPiece = Piece.new()
+    self.currentPiece = nil
     self:spawnNewPiece()
 end
 
@@ -54,6 +57,11 @@ function Game:spawnNewPiece()
     
     if not Grid.isValidPosition(self.grid, self.currentPiece) then
         self.gameOver = true
+        -- Check for high score when game ends
+        if HighScore.isHighScore(self.score) then
+            self.highScores = HighScore.addScore(self.score)
+            self.newHighScore = true
+        end
     end
 end
 
