@@ -5,6 +5,35 @@ local Theme = require('src.themes.theme')
 
 local Renderer = {}
 
+local function drawButton(component, text, colors)
+    local mouseX, mouseY = love.mouse.getPosition()
+    local isHovered = Input.isMouseOverComponent(mouseX, mouseY, component)
+
+    -- Button background
+    love.graphics.setColor(isHovered and colors.hover or colors.normal)
+    love.graphics.rectangle("fill",
+        component.X,
+        component.Y,
+        component.WIDTH,
+        component.HEIGHT)
+
+    -- Button border
+    love.graphics.setColor(colors.border)
+    love.graphics.rectangle("line",
+        component.X,
+        component.Y,
+        component.WIDTH,
+        component.HEIGHT)
+
+    -- Button text
+    love.graphics.setColor(colors.text)
+    local font = love.graphics.getFont()
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    love.graphics.print(text,
+        component.X + (component.WIDTH - textWidth) / 2,
+        component.Y + (component.HEIGHT - textHeight) / 2)
+end
 function Renderer.drawGrid(grid)
     for y = 1, Config.GRID_HEIGHT do
         for x = 1, Config.GRID_WIDTH do
@@ -132,214 +161,205 @@ function Renderer.drawCurrentPiece(piece, shadowY)
 end
 
 function Renderer.drawUI(score, level, gameOver)
-    -- Draw score and level
+    -- Draw score
     love.graphics.setColor(1, 1, 1)
-    local font = love.graphics.getFont()
     local scoreText = "Score: " .. score
-    local levelText = "Level: " .. level
-    
-    love.graphics.print(scoreText, 
-        Config.BUTTON_X, 
-        Config.BUTTON_Y + Config.BUTTON_HEIGHT + 20, 
-        0, 
-        1.2, 
-        1.2)
-        
-    love.graphics.print(levelText,
-        Config.BUTTON_X,
-        Config.BUTTON_Y + Config.BUTTON_HEIGHT + 60,
+    love.graphics.print(scoreText,
+        Config.COMPONENTS.SCORE.X,
+        Config.COMPONENTS.SCORE.Y,
         0,
         1.2,
         1.2)
-        
+
+    -- Draw level
+    local levelText = "Level: " .. level
+    love.graphics.print(levelText,
+        Config.COMPONENTS.LEVEL.X,
+        Config.COMPONENTS.LEVEL.Y,
+        0,
+        1.2,
+        1.2)
+
     -- Draw game over message if needed
     if gameOver then
-        love.graphics.print("Game Over!", 
-            Config.GRID_WIDTH * Config.GRID_SIZE / 2 - 30, 
-            Config.GRID_HEIGHT * Config.GRID_SIZE / 2)
+        love.graphics.print("Game Over!",
+            Config.GAME_AREA.WIDTH / 2 - 30,
+            Config.GAME_AREA.HEIGHT / 2)
     end
 end
 
-function Renderer.drawButton()
-    local mouseX, mouseY = love.mouse.getPosition()
-    local isHovered = Input.isMouseOverButton(mouseX, mouseY)
-    
-    -- Button background
-    if isHovered then
-        love.graphics.setColor(0.8, 0.8, 0.8)
-    else
-        love.graphics.setColor(0.7, 0.7, 0.7)
-    end
-    love.graphics.rectangle("fill", 
-        Config.BUTTON_X, 
-        Config.BUTTON_Y, 
-        Config.BUTTON_WIDTH, 
-        Config.BUTTON_HEIGHT)
-    
-    -- Button border
-    love.graphics.setColor(0.3, 0.3, 0.3)
-    love.graphics.rectangle("line", 
-        Config.BUTTON_X, 
-        Config.BUTTON_Y, 
-        Config.BUTTON_WIDTH, 
-        Config.BUTTON_HEIGHT)
-    
-    -- Button text
-    love.graphics.setColor(0, 0, 0)
-    local font = love.graphics.getFont()
-    local text = "Reset Game"
-    local textWidth = font:getWidth(text)
-    local textHeight = font:getHeight()
-    love.graphics.print(text,
-        Config.BUTTON_X + (Config.BUTTON_WIDTH - textWidth) / 2,
-        Config.BUTTON_Y + (Config.BUTTON_HEIGHT - textHeight) / 2)
+function Renderer.drawButtons()
+    -- Draw Reset button
+    drawButton(
+        Config.COMPONENTS.RESET_BUTTON,
+        "Reset Game",
+        {
+            normal = { 0.7, 0.7, 0.7 },
+            hover = { 0.8, 0.8, 0.8 },
+            border = { 0.3, 0.3, 0.3 },
+            text = { 0, 0, 0 }
+        }
+    )
+
+    -- Draw Quit button
+    drawButton(
+        Config.COMPONENTS.QUIT_BUTTON,
+        "Quit Game",
+        {
+            normal = { 0.7, 0.1, 0.1 },
+            hover = { 0.8, 0.2, 0.2 },
+            border = { 0.3, 0.3, 0.3 },
+            text = { 1, 1, 1 }
+        }
+    )
 end
 
 function Renderer.drawPreviewPiece(piece)
     if not piece then return end
 
+    local component = Config.COMPONENTS.NEXT_PIECE
     local pieceShape = piece.shape[1]
-    local pieceWidth = #pieceShape[1]
-    local pieceHeight = #pieceShape
-
-    -- Calculate center position for the preview piece
-    local centerX = Config.PREVIEW_X + (Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
-    local centerY = Config.PREVIEW_Y + (Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
 
     -- Draw preview box background
     love.graphics.setColor(0.1, 0.1, 0.1, 0.3)
     love.graphics.rectangle("fill",
-        Config.PREVIEW_X,
-        Config.PREVIEW_Y,
-        Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-        Config.PREVIEW_SIZE * Config.GRID_SIZE * Config.PREVIEW_SCALE
+        component.X,
+        component.Y,
+        component.WIDTH,
+        component.HEIGHT
     )
 
     -- Draw "Next Piece" text
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("Next Piece",
-        Config.PREVIEW_X,
-        Config.PREVIEW_Y - 25,
+        component.X,
+        component.Y,
         0,
         1.2,
         1.2
     )
 
-    -- Make sure the piece has a color by getting it from the theme if not set
-    if not piece.color then
-        piece.color = Theme.getPieceColor(piece.shape.type)
-    end
-    -- Draw the preview piece
+    -- Calculate piece size and position
+    local gridSize = component.WIDTH / Config.PREVIEW_SIZE
+    local pieceWidth = #pieceShape[1]
+    local pieceHeight = #pieceShape
+
+    -- Center the piece in the preview box
+    local offsetX = component.X + (component.WIDTH - pieceWidth * gridSize) / 2
+    local offsetY = component.Y + 25 + (component.HEIGHT - pieceHeight * gridSize) / 2
+
+    -- Draw the piece
     love.graphics.setColor(piece.color)
     for y = 1, #pieceShape do
         for x = 1, #pieceShape[1] do
             if pieceShape[y][x] == 1 then
-                -- Calculate offset to center the piece
-                local offsetX = centerX - (pieceWidth * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
-                local offsetY = centerY - (pieceHeight * Config.GRID_SIZE * Config.PREVIEW_SCALE) / 2
-
-                -- Draw each block of the piece
                 love.graphics.rectangle("fill",
-                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    Config.GRID_SIZE * Config.PREVIEW_SCALE - 1,
-                    Config.GRID_SIZE * Config.PREVIEW_SCALE - 1
-                )
-
-                -- Add 3D effect
-                love.graphics.setColor(
-                    piece.color[1] * 1.2,
-                    piece.color[2] * 1.2,
-                    piece.color[3] * 1.2
-                )
-                love.graphics.line(
-                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE + Config.GRID_SIZE * Config
-                    .PREVIEW_SCALE - 1,
-                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE
-                )
-                love.graphics.line(
-                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetX + (x - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE,
-                    offsetY + (y - 1) * Config.GRID_SIZE * Config.PREVIEW_SCALE + Config.GRID_SIZE * Config
-                    .PREVIEW_SCALE - 1
+                    offsetX + (x - 1) * gridSize,
+                    offsetY + (y - 1) * gridSize,
+                    gridSize - 1,
+                    gridSize - 1
                 )
             end
         end
     end
 end
+
 function Renderer.drawHighScores(scores, currentScore, gameOver)
+    local component = Config.COMPONENTS.HIGH_SCORES
     -- Draw high scores header
     love.graphics.setColor(1, 1, 1)
     love.graphics.print("HIGH SCORES",
-        Config.HIGHSCORE_X,
-        Config.HIGHSCORE_Y,
+        component.X,
+        component.Y,
         0,
         1.2,
         1.2)
 
     -- Draw each high score
     for i, score in ipairs(scores) do
-        -- Determine if this score is the new high score that was just achieved
         local isNewHighScore = gameOver and currentScore == score and
             (not scores[i + 1] or currentScore > scores[i + 1])
 
-        -- Set color (yellow for new high score, white for others)
-        if isNewHighScore then
-            love.graphics.setColor(1, 1, 0) -- Yellow
-        else
-            love.graphics.setColor(1, 1, 1) -- White
-        end
-
-        -- Draw score with rank
+        love.graphics.setColor(isNewHighScore and { 1, 1, 0 } or { 1, 1, 1 })
         love.graphics.print(
             string.format("%d.  %d", i, score),
-            Config.HIGHSCORE_X,
-            Config.HIGHSCORE_Y + (i * 25) + 30,
+            component.X,
+            component.Y + (i * 25) + 30,
             0,
             1,
             1
         )
     end
 
-    -- If there are no scores yet, show a message
     if #scores == 0 then
-        love.graphics.setColor(0.7, 0.7, 0.7) -- Gray color
+        love.graphics.setColor(0.7, 0.7, 0.7)
         love.graphics.print(
             "No scores yet!",
-            Config.HIGHSCORE_X,
-            Config.HIGHSCORE_Y + 30,
+            component.X,
+            component.Y + 30,
             0,
             1,
             1
         )
     end
-
-    -- Reset color
-    love.graphics.setColor(1, 1, 1)
 end
+
+function Renderer.drawQuitButton()
+    local mouseX, mouseY = love.mouse.getPosition()
+    local isHovered = Input.isMouseOverQuitButton(mouseX, mouseY)
+
+    -- Button background
+    if isHovered then
+        love.graphics.setColor(0.8, 0.2, 0.2) -- Lighter red when hovered
+    else
+        love.graphics.setColor(0.7, 0.1, 0.1) -- Dark red normally
+    end
+    love.graphics.rectangle("fill",
+        Config.QUIT_BUTTON_X,
+        Config.QUIT_BUTTON_Y,
+        Config.BUTTON_WIDTH,
+        Config.BUTTON_HEIGHT)
+
+    -- Button border
+    love.graphics.setColor(0.3, 0.3, 0.3)
+    love.graphics.rectangle("line",
+        Config.QUIT_BUTTON_X,
+        Config.QUIT_BUTTON_Y,
+        Config.BUTTON_WIDTH,
+        Config.BUTTON_HEIGHT)
+
+    -- Button text
+    love.graphics.setColor(1, 1, 1) -- White text
+    local font = love.graphics.getFont()
+    local text = "Quit Game"
+    local textWidth = font:getWidth(text)
+    local textHeight = font:getHeight()
+    love.graphics.print(text,
+        Config.QUIT_BUTTON_X + (Config.BUTTON_WIDTH - textWidth) / 2,
+        Config.QUIT_BUTTON_Y + (Config.BUTTON_HEIGHT - textHeight) / 2)
+end
+
 function Renderer.draw(gameState)
     -- Set background color
     love.graphics.setColor(Theme.current.background)
-    love.graphics.rectangle("fill", 0, 0, love.graphics.getWidth(), love.graphics.getHeight())
+    love.graphics.rectangle("fill", 0, 0, Config.WINDOW.WIDTH, Config.WINDOW.HEIGHT)
     -- Draw the game grid
     Renderer.drawGrid(gameState.grid)
-    
+
     -- Draw current piece and shadow if game is not over
     if not gameState.gameOver then
         local shadowY = gameState:getShadowY()
         Renderer.drawCurrentPiece(gameState.currentPiece, shadowY)
     end
-    -- Draw preview piece
-    Renderer.drawPreviewPiece(gameState.nextPiece)
-    
+
     -- Draw UI elements
     Renderer.drawUI(gameState.score, gameState.level, gameState.gameOver)
+    Renderer.drawPreviewPiece(gameState.nextPiece)
     Renderer.drawHighScores(gameState.highScores, gameState.score, gameState.gameOver)
-    Renderer.drawButton()
-    
+    Renderer.drawButtons()
+
+    -- Draw particles
+    gameState.grid.particles:draw()
     -- Reset color
     love.graphics.setColor(1, 1, 1)
 end

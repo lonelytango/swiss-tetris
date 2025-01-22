@@ -6,11 +6,15 @@ local Input = {
     INITIAL_DELAY = 0.2, -- Delay before starting repeat
 }
 
-function Input.isMouseOverButton(x, y)
-    return x >= Config.BUTTON_X and x <= Config.BUTTON_X + Config.BUTTON_WIDTH and
-           y >= Config.BUTTON_Y and y <= Config.BUTTON_Y + Config.BUTTON_HEIGHT
+function Input.isMouseOverComponent(x, y, component)
+    return x >= component.X and x <= component.X + component.WIDTH and
+        y >= component.Y and y <= component.Y + component.HEIGHT
 end
 
+function Input.isMouseOverQuitButton(x, y)
+    return x >= Config.QUIT_BUTTON_X and x <= Config.QUIT_BUTTON_X + Config.BUTTON_WIDTH and
+        y >= Config.QUIT_BUTTON_Y and y <= Config.QUIT_BUTTON_Y + Config.BUTTON_HEIGHT
+end
 function Input.handleKeyPressed(key, game)
     Input.keyStates[key] = {
         pressed = true,
@@ -27,6 +31,8 @@ function Input.handleKeyPressed(key, game)
         game:hardDrop()
     elseif key == "up" then
         game:rotatePiece()
+    elseif key == "escape" then
+        love.event.quit()
     end
 end
 
@@ -46,8 +52,12 @@ function Input.update(dt, game)
 end
 
 function Input.handleMousePressed(x, y, button, game)
-    if button == 1 and Input.isMouseOverButton(x, y) then
-        game:reset()
+    if button == 1 then
+        if Input.isMouseOverComponent(x, y, Config.COMPONENTS.RESET_BUTTON) then
+            game:reset()
+        elseif Input.isMouseOverComponent(x, y, Config.COMPONENTS.QUIT_BUTTON) then
+            love.event.quit()
+        end
     end
 end
 
