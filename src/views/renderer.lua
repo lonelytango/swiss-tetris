@@ -247,62 +247,34 @@ function Renderer.drawPreviewPiece(piece)
 
     -- Center the piece in the preview box
     local offsetX = component.X + (component.WIDTH - pieceWidth * gridSize) / 2
-    local offsetY = component.Y + 20 + (component.HEIGHT - pieceHeight * gridSize) / 2
+	local offsetY = component.Y + 10 + (component.HEIGHT - pieceHeight * gridSize) / 2
 
-    -- Draw the piece
-    love.graphics.setColor(piece.color)
-    for y = 1, #pieceShape do
-        for x = 1, #pieceShape[1] do
-            if pieceShape[y][x] == 1 then
-                love.graphics.rectangle("fill",
-                    offsetX + (x - 1) * gridSize,
-                    offsetY + (y - 1) * gridSize,
-                    gridSize - 1,
-                    gridSize - 1
-                )
-            end
-        end
-    end
+	-- Draw the piece
+	love.graphics.setColor(piece.color)
+	for y = 1, #pieceShape do
+		for x = 1, #pieceShape[1] do
+			if pieceShape[y][x] == 1 then
+				love.graphics.rectangle(
+					"fill",
+					offsetX + (x - 1) * gridSize,
+					offsetY + (y - 1) * gridSize,
+					gridSize - 1,
+					gridSize - 1
+				)
+			end
+		end
+	end
 end
 
 function Renderer.drawHighScores(scores, currentScore, gameOver)
-    local component = Config.COMPONENTS.HIGH_SCORES
-    -- Draw high scores header
-    love.graphics.setColor(1, 1, 1)
-    love.graphics.print("HIGH SCORES",
-        component.X,
-        component.Y,
-        0,
-        1.2,
-        1.2)
+	local component = Config.COMPONENTS.HIGH_SCORES
+	-- Draw high scores header
+	love.graphics.setColor(1, 1, 1)
+	love.graphics.print("HIGH SCORES", component.X, component.Y, 0, 1.2, 1.2)
 
-    -- Draw each high score
-    for i, score in ipairs(scores) do
-        local isNewHighScore = gameOver and currentScore == score and
-            (not scores[i + 1] or currentScore > scores[i + 1])
-
-        love.graphics.setColor(isNewHighScore and { 1, 1, 0 } or { 1, 1, 1 })
-        love.graphics.print(
-            string.format("%d.  %d", i, score),
-            component.X,
-            component.Y + (i * 25) + 30,
-            0,
-            1,
-            1
-        )
-    end
-
-    if #scores == 0 then
-        love.graphics.setColor(0.7, 0.7, 0.7)
-        love.graphics.print(
-            "No scores yet!",
-            component.X,
-            component.Y + 30,
-            0,
-            1,
-            1
-        )
-    end
+	love.graphics.setColor(0.7, 0.7, 0.7)
+	local scoreText = (#scores == 0) and "No scores yet!" or scores[1]
+	love.graphics.print(scoreText, component.X, component.Y + 30, 0, 1, 1)
 end
 
 function Renderer.drawQuitButton()

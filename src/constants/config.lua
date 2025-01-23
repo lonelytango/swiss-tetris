@@ -69,8 +69,8 @@ Config.COMPONENTS = {
     NEXT_PIECE = {
         X = Config.SIDE_PANEL.X,
         Y = getComponentY(4),
-        WIDTH = Config.SIDE_PANEL.WIDTH,
-        HEIGHT = Config.SIDE_PANEL.WIDTH
+        WIDTH = Config.SIDE_PANEL.WIDTH * 0.8,
+        HEIGHT = Config.SIDE_PANEL.WIDTH * 0.8
     },
 
     HIGH_SCORES = {
