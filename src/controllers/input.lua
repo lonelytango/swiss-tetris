@@ -14,7 +14,6 @@ end
 function Input.isMouseOverQuitButton(x, y)
     return x >= Config.QUIT_BUTTON_X and x <= Config.QUIT_BUTTON_X + Config.BUTTON_WIDTH and
         y >= Config.QUIT_BUTTON_Y and y <= Config.QUIT_BUTTON_Y + Config.BUTTON_HEIGHT
-        
 end
 
 function Input.handleKeyPressed(key, game)
@@ -35,6 +34,8 @@ function Input.handleKeyPressed(key, game)
 		game:rotatePiece()
 	elseif key == "escape" then
 		love.event.quit()
+	elseif key == "q" then
+		game:executeAction("gravity")
 	end
 end
 

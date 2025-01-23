@@ -3,69 +3,74 @@ local Config = require('src.constants.config')
 local Grid = require('src.models.grid')
 local Piece = require('src.models.piece')
 local HighScore = require('src.models.highscore')
+local ActionSystem = require("src.controllers.action_system")
+local GravityAction = require("src.models.actions.gravity_action")
 
 local Game = {
-    grid = nil,
-    currentPiece = nil,
-    nextPiece = nil, -- Add next piece
-    score = 0,
-    level = 1,
-    dropTimer = 0,
-    gameOver = false,
-    linesForNextLevel = 0,
-    currentDropTime = Config.INITIAL_DROP_TIME,
-    highScores = {},
-    newHighScore = false
+	grid = nil,
+	currentPiece = nil,
+	nextPiece = nil, -- Add next piece
+	score = 0,
+	level = 1,
+	dropTimer = 0,
+	gameOver = false,
+	linesForNextLevel = 0,
+	currentDropTime = Config.INITIAL_DROP_TIME,
+	highScores = {},
+	newHighScore = false,
 }
 
 function Game:new()
-    local o = {}
-    setmetatable(o, self)
-    self.__index = self
-    return o
+	local o = {}
+	setmetatable(o, self)
+	self.__index = self
+	return o
 end
 
 function Game:init()
-    self.grid = Grid.new()
-    Piece.resetBag() -- Reset the random bag
-    self.nextPiece = Piece.new()
-    self.currentPiece = nil
-    self.highScores = HighScore.load()
-    self:spawnNewPiece()
+	self.grid = Grid.new()
+	Piece.resetBag() -- Reset the random bag
+	self.nextPiece = Piece.new()
+	self.currentPiece = nil
+	self.highScores = HighScore.load()
+	self:spawnNewPiece()
+
+	-- Register actions
+	ActionSystem.registerAction("gravity", GravityAction)
 end
 
 function Game:reset()
-    self.grid = Grid.new()
-    self.score = 0
-    self.level = 1
-    self.dropTimer = 0
-    self.gameOver = false
-    self.linesForNextLevel = 0
-    self.currentDropTime = Config.INITIAL_DROP_TIME
-    Piece.resetBag() -- Reset the random bag
-    self.nextPiece = Piece.new()
-    self.currentPiece = nil
-    self:spawnNewPiece()
+	self.grid = Grid.new()
+	self.score = 0
+	self.level = 1
+	self.dropTimer = 0
+	self.gameOver = false
+	self.linesForNextLevel = 0
+	self.currentDropTime = Config.INITIAL_DROP_TIME
+	Piece.resetBag() -- Reset the random bag
+	self.nextPiece = Piece.new()
+	self.currentPiece = nil
+	self:spawnNewPiece()
 end
 
 function Game:spawnNewPiece()
-    self.currentPiece = {
-        shape = self.nextPiece.shape,
-        x = math.floor(Config.GRID_WIDTH / 2) - 1,
-        y = 1,
-        color = self.nextPiece.color
-    }
-    -- Generate new next piece
-    self.nextPiece = Piece.new()
-    
-    if not Grid.isValidPosition(self.grid, self.currentPiece) then
-        self.gameOver = true
-        -- Check for high score when game ends
-        if HighScore.isHighScore(self.score) then
-            self.highScores = HighScore.addScore(self.score)
-            self.newHighScore = true
-        end
-    end
+	self.currentPiece = {
+		shape = self.nextPiece.shape,
+		x = math.floor(Config.GRID_WIDTH / 2) - 1,
+		y = 1,
+		color = self.nextPiece.color,
+	}
+	-- Generate new next piece
+	self.nextPiece = Piece.new()
+
+	if not Grid.isValidPosition(self.grid, self.currentPiece) then
+		self.gameOver = true
+		-- Check for high score when game ends
+		if HighScore.isHighScore(self.score) then
+			self.highScores = HighScore.addScore(self.score)
+			self.newHighScore = true
+		end
+	end
 end
 
 function Game:update(dt)
@@ -179,17 +184,24 @@ end
 function Game:getShadowY()
 	local originalY = self.currentPiece.y
 	local shadowY = originalY
-    while true do
-        shadowY = shadowY + 1
-        self.currentPiece.y = shadowY
-        if not Grid.isValidPosition(self.grid, self.currentPiece) then
-            shadowY = shadowY - 1
-            break
-        end
-    end
-    
-    self.currentPiece.y = originalY
-    return shadowY
+	while true do
+		shadowY = shadowY + 1
+		self.currentPiece.y = shadowY
+		if not Grid.isValidPosition(self.grid, self.currentPiece) then
+			shadowY = shadowY - 1
+			break
+		end
+	end
+
+	self.currentPiece.y = originalY
+	return shadowY
+end
+
+function Game:executeAction(actionName, ...)
+	if not self.gameOver and not self.grid.isAnimating then
+		return ActionSystem.executeAction(actionName, self.grid, ...)
+	end
+	return false
 end
 
 return Game

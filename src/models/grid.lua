@@ -160,4 +160,12 @@ function Grid.updateAnimation(grid, dt)
     return 0
 end
 
+function Grid.applyGravity(grid)
+	-- Support for blocks falling
+end
+
+function Grid.destroyBlock(grid, x, y)
+	-- Support for block destruction
+end
+
 return Grid
