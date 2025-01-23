@@ -65,6 +65,29 @@ Piece.TETROMINOES = {
             {0, 0, 0}
         },
         type = 'Z'
+    },
+    -- A piece
+    {
+        {
+            { 1 }
+        },
+        type = 'A'
+    },
+    -- B piece
+    {
+        {
+            { 1, 1 },
+            { 0, 0 }
+        },
+        type = 'B'
+    },
+    -- C piece
+    {
+        {
+            { 1, 0 },
+            { 1, 1 }
+        },
+        type = 'C'
     }
 }
 
@@ -82,7 +105,7 @@ function Piece.rotate(pieceData)
     return newPiece
 end
 
-local pieceBag = RandomBag.new(7) -- 7 for the number of tetromino types
+local pieceBag = RandomBag.new(#Piece.TETROMINOES) -- 7 for the number of tetromino types
 function Piece.new()
     local pieceIndex = pieceBag:next()
     local piece = {
