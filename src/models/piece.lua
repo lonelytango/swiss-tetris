@@ -66,29 +66,29 @@ Piece.TETROMINOES = {
         },
         type = 'Z'
     },
-    -- A piece
-    {
-        {
-            { 1 }
-        },
-        type = 'A'
-    },
-    -- B piece
-    {
-        {
-            { 1, 1 },
-            { 0, 0 }
-        },
-        type = 'B'
-    },
-    -- C piece
-    {
-        {
-            { 1, 0 },
-            { 1, 1 }
-        },
-        type = 'C'
-    }
+    -- -- A piece
+    -- {
+    --     {
+    --         { 1 }
+    --     },
+    --     type = 'A'
+    -- },
+    -- -- B piece
+    -- {
+    --     {
+    --         { 1, 1 },
+    --         { 0, 0 }
+    --     },
+    --     type = 'B'
+    -- },
+    -- -- C piece
+    -- {
+    --     {
+    --         { 1, 0 },
+    --         { 1, 1 }
+    --     },
+    --     type = 'C'
+    -- }
 }
 
 function Piece.rotate(pieceData)

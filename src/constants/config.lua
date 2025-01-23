@@ -4,7 +4,7 @@ local Config = {
     GRID_WIDTH = 10,
     GRID_HEIGHT = 20,
     -- Game mechanics configuration
-    INITIAL_DROP_TIME = 2.0,
+    INITIAL_DROP_TIME = 1.0,
     LEVEL_LINES_REQUIREMENT = 10,
     SPEED_INCREASE_FACTOR = 0.9,
     -- Preview configuration
