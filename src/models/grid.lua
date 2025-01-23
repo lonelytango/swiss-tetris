@@ -12,7 +12,7 @@ function Grid.new()
             grid[y][x] = {occupied = false, color = nil}
         end
     end
-
+    
     -- Add animation state
     grid.clearingLines = {}
     grid.animationTimer = 0

@@ -69,110 +69,116 @@ function Game:spawnNewPiece()
 end
 
 function Game:update(dt)
-    if self.gameOver then return end
-    
-    -- Update grid animations first
-    local linesCleared = Grid.updateAnimation(self.grid, dt)
-    if linesCleared > 0 then
-        self.linesForNextLevel = self.linesForNextLevel + linesCleared
-        self:updateScore(linesCleared)
-        
-        if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
-            self:levelUp()
-        end
-    end
-    
-    -- Only update drop timer if not animating
-    if not self.grid.isAnimating then
-        self.dropTimer = self.dropTimer + dt
-        if self.dropTimer >= self.currentDropTime then
-            self.dropTimer = 0
-            self:movePieceDown()
-        end
-    end
+	if self.gameOver then
+		return
+	end
+	-- Update grid animations first
+	local linesCleared = Grid.updateAnimation(self.grid, dt)
+	if linesCleared > 0 then
+		self.linesForNextLevel = self.linesForNextLevel + linesCleared
+		self:updateScore(linesCleared)
+
+		if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
+			self:levelUp()
+		end
+	end
+
+	-- Only update drop timer if not animating
+	if not self.grid.isAnimating then
+		self.dropTimer = self.dropTimer + dt
+		if self.dropTimer >= self.currentDropTime then
+			self.dropTimer = 0
+			self:movePieceDown()
+		end
+	end
 end
 
 function Game:movePieceDown()
-    self.currentPiece.y = self.currentPiece.y + 1
-    if not Grid.isValidPosition(self.grid, self.currentPiece) then
-        self.currentPiece.y = self.currentPiece.y - 1
-        Grid.lockPiece(self.grid, self.currentPiece)
-        self:checkLines()
-        self:spawnNewPiece()
-    end
+	self.currentPiece.y = self.currentPiece.y + 1
+	if not Grid.isValidPosition(self.grid, self.currentPiece) then
+		self.currentPiece.y = self.currentPiece.y - 1
+		Grid.lockPiece(self.grid, self.currentPiece)
+		self:checkLines()
+		self:spawnNewPiece()
+	end
 end
 
 function Game:movePiece(direction)
-    if self.gameOver then return end
-    
-    local oldX = self.currentPiece.x
-    self.currentPiece.x = self.currentPiece.x + direction
-    
-    if not Grid.isValidPosition(self.grid, self.currentPiece) then
-        self.currentPiece.x = oldX
-    end
+	if self.gameOver then
+		return
+	end
+
+	local oldX = self.currentPiece.x
+	self.currentPiece.x = self.currentPiece.x + direction
+
+	if not Grid.isValidPosition(self.grid, self.currentPiece) then
+		self.currentPiece.x = oldX
+	end
 end
 
 function Game:rotatePiece()
-    if self.gameOver then return end
-    
-    local oldShape = self.currentPiece.shape[1]
-    self.currentPiece.shape[1] = Piece.rotate(self.currentPiece)
-    
-    if not Grid.isValidPosition(self.grid, self.currentPiece) then
-        self.currentPiece.shape[1] = oldShape
-    end
+	if self.gameOver then
+		return
+	end
+
+	local oldShape = self.currentPiece.shape[1]
+	self.currentPiece.shape[1] = Piece.rotate(self.currentPiece)
+
+	if not Grid.isValidPosition(self.grid, self.currentPiece) then
+		self.currentPiece.shape[1] = oldShape
+	end
 end
 
 function Game:hardDrop()
-    if self.gameOver then return end
-    
-    while Grid.isValidPosition(self.grid, self.currentPiece) do
-        self.currentPiece.y = self.currentPiece.y + 1
-    end
-    self.currentPiece.y = self.currentPiece.y - 1
-    Grid.lockPiece(self.grid, self.currentPiece)
-    self:checkLines()
-    self:spawnNewPiece()
+	if self.gameOver then
+		return
+	end
+
+	while Grid.isValidPosition(self.grid, self.currentPiece) do
+		self.currentPiece.y = self.currentPiece.y + 1
+	end
+	self.currentPiece.y = self.currentPiece.y - 1
+	Grid.lockPiece(self.grid, self.currentPiece)
+	self:checkLines()
+	self:spawnNewPiece()
 end
 
 function Game:checkLines()
-    local linesCleared = Grid.clearLines(self.grid)
-    
-    if linesCleared > 0 then
-        self.linesForNextLevel = self.linesForNextLevel + linesCleared
-        self:updateScore(linesCleared)
-        
-        if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
-            self:levelUp()
-        end
-    end
+	local linesCleared = Grid.clearLines(self.grid)
+
+	if linesCleared > 0 then
+		self.linesForNextLevel = self.linesForNextLevel + linesCleared
+		self:updateScore(linesCleared)
+
+		if self.linesForNextLevel >= Config.LEVEL_LINES_REQUIREMENT then
+			self:levelUp()
+		end
+	end
 end
 
 function Game:updateScore(linesCleared)
-    self.score = self.score + (100 * linesCleared * self.level)
-    if linesCleared >= 4 then
-        self.score = self.score + (400 * self.level)
-    elseif linesCleared >= 3 then
-        self.score = self.score + (200 * self.level)
-    elseif linesCleared >= 2 then
-        self.score = self.score + (100 * self.level)
-    end
+	self.score = self.score + (100 * linesCleared * self.level)
+	if linesCleared >= 4 then
+		self.score = self.score + (400 * self.level)
+	elseif linesCleared >= 3 then
+		self.score = self.score + (200 * self.level)
+	elseif linesCleared >= 2 then
+		self.score = self.score + (100 * self.level)
+	end
 end
 
 function Game:levelUp()
-    self.level = self.level + 1
-    self.linesForNextLevel = self.linesForNextLevel - Config.LEVEL_LINES_REQUIREMENT
-    self.currentDropTime = Config.INITIAL_DROP_TIME * (Config.SPEED_INCREASE_FACTOR ^ (self.level - 1))
-    if self.currentDropTime < 0.1 then
-        self.currentDropTime = 0.1
-    end
+	self.level = self.level + 1
+	self.linesForNextLevel = self.linesForNextLevel - Config.LEVEL_LINES_REQUIREMENT
+	self.currentDropTime = Config.INITIAL_DROP_TIME * (Config.SPEED_INCREASE_FACTOR ^ (self.level - 1))
+	if self.currentDropTime < 0.1 then
+		self.currentDropTime = 0.1
+	end
 end
 
 function Game:getShadowY()
-    local originalY = self.currentPiece.y
-    local shadowY = originalY
-    
+	local originalY = self.currentPiece.y
+	local shadowY = originalY
     while true do
         shadowY = shadowY + 1
         self.currentPiece.y = shadowY
